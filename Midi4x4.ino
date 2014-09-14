@@ -18,9 +18,9 @@
 
 
 // pin connections- the #define tag will replace all instances of "latchPin" in your code with A1 (and so on)
-#define latchPin A1
-#define clockPin A0
-#define dataPin A2
+const int clockPin = 10;
+const int latchPin = 11;
+const int dataPin = 12;
 
 // looping indexes
 int ir; // row
