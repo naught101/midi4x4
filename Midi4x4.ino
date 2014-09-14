@@ -35,32 +35,44 @@ int cr;
 int cg;
 int cb;
 
-// storage variable
+// temporary storage variables
 byte dataToSendH;
 byte dataToSendL;
 
+int last_state;
+int current_state;
+int led_state;
+
+// long term storage variables
 const int colours = 3;
 const int rows = 4;
 const int cols = 4;
 int colour_grid[colours][cols][rows] = {
-  {
+  { // red
     {0, 0, 0, 0},
     {0, 0, 0, 0},
     {0, 0, 0, 0},
     {0, 0, 0, 0}
   },
-  {
+  { // green
     {0, 0, 0, 0},
     {0, 0, 0, 0},
     {0, 0, 0, 0},
     {0, 0, 0, 0}
   },
-  {
+  { // blue
     {0, 0, 0, 0},
     {0, 0, 0, 0},
     {0, 0, 0, 0},
     {0, 0, 0, 0}
   }
+};
+
+int buttons_last[cols][rows] = {
+  {0, 0, 0, 0},
+  {0, 0, 0, 0},
+  {0, 0, 0, 0},
+  {0, 0, 0, 0}
 };
 
 void setup() {
@@ -88,7 +100,17 @@ void loop() {
     digitalWrite(buttonPinsOut[ic], LOW);
 
     for (ir = 0; ir < 4; ir++) {
-       colour_grid[0][ic][ir] = 1-digitalRead(buttonPinsIn[ir]);
+      led_state = colour_grid[0][ic][ir];
+      last_state = buttons_last[ic][ir];
+      current_state = 1 - digitalRead(buttonPinsIn[ir]);
+
+      if ((current_state == 1) & (last_state != current_state)) {
+        colour_grid[0][ic][ir] = !led_state;
+        colour_grid[1][ic][ir] = !led_state;
+        colour_grid[2][ic][ir] = !led_state;
+      }
+
+      buttons_last[ic][ir] = current_state;
     }
 
     digitalWrite(buttonPinsOut[ic], HIGH);
