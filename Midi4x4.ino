@@ -18,6 +18,8 @@
 
 
 // pin connections- the #define tag will replace all instances of "latchPin" in your code with A1 (and so on)
+int buttonPinsOut[4] = {2, 3, 4, 5};
+int buttonPinsIn[4] = {6, 7, 8, 9};
 const int clockPin = 10;
 const int latchPin = 11;
 const int dataPin = 12;
@@ -40,29 +42,40 @@ byte dataToSendL;
 const int colours = 3;
 const int rows = 4;
 const int cols = 4;
-int colour_grid[][cols][rows] = {
-  {
-    {1, 1, 1, 1},
-    {0, 0, 0, 0},
-    {0, 0, 0, 0},
-    {1, 0, 0, 1}
-  },
+int colour_grid[colours][cols][rows] = {
   {
     {0, 0, 0, 0},
-    {1, 1, 1, 1},
     {0, 0, 0, 0},
-    {0, 1, 0, 0}
+    {0, 0, 0, 0},
+    {0, 0, 0, 0}
   },
   {
     {0, 0, 0, 0},
     {0, 0, 0, 0},
-    {1, 1, 1, 1},
-    {0, 0, 1, 0}
+    {0, 0, 0, 0},
+    {0, 0, 0, 0}
+  },
+  {
+    {0, 0, 0, 0},
+    {0, 0, 0, 0},
+    {0, 0, 0, 0},
+    {0, 0, 0, 0}
   }
 };
 
 void setup() {
-  // set pins as output
+
+  // button matrix.
+  pinMode(buttonPinsOut[0], OUTPUT);
+  pinMode(buttonPinsOut[1], OUTPUT);
+  pinMode(buttonPinsOut[2], OUTPUT);
+  pinMode(buttonPinsOut[3], OUTPUT);
+  pinMode(buttonPinsIn[0], INPUT_PULLUP);
+  pinMode(buttonPinsIn[1], INPUT_PULLUP);
+  pinMode(buttonPinsIn[2], INPUT_PULLUP);
+  pinMode(buttonPinsIn[3], INPUT_PULLUP);
+
+  // 74HC595 digital out pins
   pinMode(latchPin, OUTPUT);
   pinMode(clockPin, OUTPUT);
   pinMode(dataPin, OUTPUT);
@@ -71,16 +84,25 @@ void setup() {
 
 void loop() {
 
+  for (ic = 0; ic < 4; ic++) {
+    digitalWrite(buttonPinsOut[ic], LOW);
+
+    for (ir = 0; ir < 4; ir++) {
+       colour_grid[0][ic][ir] = 1-digitalRead(buttonPinsIn[ir]);
+    }
+
+    digitalWrite(buttonPinsOut[ic], HIGH);
+  }
+
+
   for (ii = 0; ii < 8; ii++) {
     for (ic = 0; ic < 4; ic++) {
       for (ir = 0; ir < 4; ir++) {
 
         cr = colour_grid[0][ic][ir];
-        cg = colour_grid[1][ic][ir] * (ii%2); // green and blue are too bright, so only light up half the time.
-        cb = colour_grid[2][ic][ir] * (ii%2);
+        cg = colour_grid[1][ic][ir] * (ii % 2); // green and blue are too bright, so only light up half the time.
+        cb = colour_grid[2][ic][ir] * (ii % 2);
 
-
-        // dataToSend = (1 << (i+4)) | (15 & ~(1 << ic));
 
         // ir is cathode select.
 
@@ -99,7 +121,7 @@ void loop() {
         // set latch pin high- this sends data to outputs so the LEDs will light up
         digitalWrite(latchPin, HIGH);
 
-        delay(100);// wait
+        //delay(100);// wait
       }
     }
   }
